@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = "==3.10.*"
 
 [[package]]
@@ -148,7 +148,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "authzed", specifier = "~=1.24.3" },
-    { name = "cryptography", specifier = "~=46.0" },
+    { name = "cryptography", specifier = ">=46.0.7,<47.0" },
 ]
 
 [package.metadata.requires-dev]
