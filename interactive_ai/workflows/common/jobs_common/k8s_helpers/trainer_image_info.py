@@ -53,30 +53,45 @@ class TrainerImageInfo:
         :param training_framework: Dataclass to choose the trainer image
         """
 
-        if training_framework.type != TrainingFrameworkType.OTX:
-            raise ValueError(f"{training_framework.type} type is not supported yet.")
-
         namespace = os.getenv("IMPT_NAMESPACE", "impt")
         name = os.getenv("IMPT_CONFIGURATION", "impt-configuration")
 
         configmap = asyncio.run(get_config_map(namespace=namespace, name=name))
 
         render_gid = 0
-
         msg = "Cannot get `{0}` field from config map `{1}/{2}`"
 
-        # This information is from `impt-configuration` config map in the namespace `impt`
-        if (otx2_image := configmap.data.get("otx2_image")) is None:
-            raise ValueError(msg.format("otx2_image", namespace, name))
-        if render_gid_value := configmap.data.get("render_gid"):
-            render_gid = int(render_gid_value)
-        image_name = otx2_image
+        if training_framework.type == TrainingFrameworkType.OTX:
+            image_key = "otx2_image"
+
+            if render_gid_value := configmap.data.get("render_gid"):
+                render_gid = int(render_gid_value)
+
+        elif (
+            training_framework.type == TrainingFrameworkType.THIRD_PARTY
+            and training_framework.version.startswith("ultralytics")
+        ):
+            image_key = "ultralytics_image"
+
+        else:
+            raise ValueError(
+                f"Training framework {training_framework.type} "
+                f"version {training_framework.version} is not supported yet."
+            )
+
+        if (image_name := configmap.data.get(image_key)) is None:
+            raise ValueError(msg.format(image_key, namespace, name))
 
         logger.info(
-            f"Trainer image has been selected {image_name}, where a model has trainer "
-            f"identification for {training_framework.version}."
+            f"Trainer image has been selected {image_name}, "
+            f"framework={training_framework.type}, "
+            f"version={training_framework.version}."
         )
-        return cls(train_image_name=image_name, render_gid=render_gid)
+
+        return cls(
+            train_image_name=image_name,
+            render_gid=render_gid,
+        )
 
     def to_image_full_name(self) -> str:
         """Get image full name.

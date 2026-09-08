@@ -38,6 +38,15 @@ class TestTrainerImageInfo:
                 "otx2_image",
                 992,
             ),
+            (
+                TrainingFramework(
+                    type=TrainingFrameworkType.THIRD_PARTY,
+                    version="ultralytics-8.4.107",
+                ),
+                "false",
+                "ultralytics_image",
+                0,
+            ),
         ],
     )
     @patch("jobs_common.k8s_helpers.trainer_image_info.get_config_map")
@@ -59,6 +68,7 @@ class TestTrainerImageInfo:
             "tag": "develop",
             "ote_image": "ote_image",
             "otx2_image": "otx2_image",
+            "ultralytics_image": "ultralytics_image",
             "render_gid": str(render_gid),
         }
         mock_get_config_map.return_value = MagicMock()
@@ -68,3 +78,15 @@ class TestTrainerImageInfo:
 
         assert trainer_image_info.to_image_full_name() == image_full_name
         assert trainer_image_info.render_gid == render_gid
+    
+    @patch("jobs_common.k8s_helpers.trainer_image_info.get_config_map")
+    def test_create_unsupported_third_party(self, mock_get_config_map):
+        mock_get_config_map.return_value = MagicMock()
+
+        training_framework = TrainingFramework(
+            type=TrainingFrameworkType.THIRD_PARTY,
+            version="some-other-framework",
+        )
+
+        with pytest.raises(ValueError, match="is not supported yet"):
+            TrainerImageInfo.create(training_framework)
