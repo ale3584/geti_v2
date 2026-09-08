@@ -240,19 +240,22 @@ def prepare_train(train_data: TrainWorkflowData, dataset: Dataset) -> TrainOutpu
         revamped_hyperparameters=revamped_hyperparameters,
     )
 
+    model_manifest = SupportedModels.get_model_manifest_by_id(model_storage.model_manifest_id)
+    has_xai = model_manifest.capabilities.xai
+
     output_base_model = model_builder.create_model(
         model_format=ModelFormat.BASE_FRAMEWORK,
-        has_xai_head=True,
+        has_xai_head=has_xai,
         previous_revision=input_model,
         previous_trained_revision=input_model,
     )
+
     use_fp16 = FeatureFlagProvider.is_enabled(FeatureFlag.FEATURE_FLAG_FP16_INFERENCE)
 
     # TODO https://github.com/open-edge-platform/geti/issues/924: remove dependency to TrainOutputModels.mo_with_xai
-    model_manifest = SupportedModels.get_model_manifest_by_id(model_storage.model_manifest_id)
     mo_base_model = model_builder.create_model(
         model_format=ModelFormat.OPENVINO,
-        has_xai_head=True,
+        has_xai_head=has_xai,
         precision=[ModelPrecision.FP16 if use_fp16 else ModelPrecision.FP32],
         model_optimization_type=ModelOptimizationType.MO,
         previous_revision=output_base_model,
