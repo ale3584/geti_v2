@@ -99,9 +99,9 @@ def check_k8s_is_not_installed():  # noqa: ANN201
 def check_k8s_cpu_requirements(kubeconfig_path: str):  # noqa: ANN201
     """
     Check if all nodes on the cluster have minimum number of CPU cores, as defined by PLATFORM_CPU_CORES_MIN
-    environment variable (defaults to 48 cores).
+    environment variable (defaults to 12 cores).
     """
-    cpu_requirement = os.environ.get("PLATFORM_CPU_CORES_MIN", "16")
+    cpu_requirement = os.environ.get("PLATFORM_CPU_CORES_MIN", "12")
     cpu_requirement_in_millicpus = k8s_cpu_to_millicpus(cpu_requirement)
     available_resources: ClusterCapacity = get_cluster_resource_capacity(kubeconfig_path=kubeconfig_path)
     cpu_capacity_in_cores = ",".join([str(millicpus // 1000) for millicpus in available_resources.cpu_capacity])

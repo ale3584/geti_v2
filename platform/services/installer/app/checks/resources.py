@@ -46,7 +46,7 @@ from validators.path import is_path_valid
 
 logger = logging.getLogger(__name__)
 
-PLATFORM_CPU_CORES_MIN = int(os.getenv("PLATFORM_CPU_CORES_MIN", "16"))
+PLATFORM_CPU_CORES_MIN = int(os.getenv("PLATFORM_CPU_CORES_MIN", "12"))
 # Expressed in GB (1000 ** 3)
 PLATFORM_MEMORY_MIN = (k8s_memory_to_kibibytes(os.getenv("PLATFORM_MEMORY_MIN", "64GB")) * 1024) // (1000**3)
 # Expressed in GB (1000 ** 3)
